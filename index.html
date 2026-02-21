@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>slvz.web</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-black: #000000;
+            --neon-cyan: #00f2ff;
+            --neon-magenta: #ff00ff;
+            --dim-cyan: rgba(0, 242, 255, 0.15);
+            --text-color: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: var(--text-color);
+            overflow-x: hidden;
+            /* Scanlines sutis apenas para textura */
+            background-image: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(20, 20, 20, 0.5) 50%);
+            background-size: 100% 4px;
+        }
+
+        /* --- BACKGROUND TECH LAYERS --- */
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(var(--dim-cyan) 1px, transparent 1px),
+                linear-gradient(90deg, var(--dim-cyan) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: center;
+            mask-image: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Moldura de Canto (Cyber Aesthetics) */
+        .corner-border {
+            position: absolute;
+            width: 40px; height: 40px;
+            border: 2px solid var(--neon-cyan);
+        }
+        .top-left { top: 40px; left: 40px; border-right: 0; border-bottom: 0; }
+        .bottom-right { bottom: 40px; right: 40px; border-left: 0; border-top: 0; }
+
+        /* GLITCH CORE */
+        .glitch-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .glitch-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
+            color: var(--text-color);
+            text-transform: uppercase;
+            position: relative;
+            letter-spacing: 8px;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        /* Efeito de Flicker (Piscar) */
+        .flicker {
+            animation: flicker 2s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+            20%, 24%, 55% { opacity: 0.3; text-shadow: none; }
+        }
+
+        .hero-desc {
+            max-width: 600px;
+            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+            background: rgba(0, 242, 255, 0.05);
+            padding: 10px 20px;
+            border-left: 3px solid var(--neon-cyan);
+        }
+
+        /* BOTÃO TERMINAL */
+        .terminal-btn {
+            background: transparent;
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            padding: 18px 50px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% 70%, 85% 100%, 0 100%);
+        }
+
+        .terminal-btn:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-cyan);
+            transform: translateY(-2px);
+        }
+
+        /* HUD ELEMENTS */
+        .hud-info {
+            position: absolute;
+            bottom: 40px;
+            left: 60px;
+            font-size: 0.65rem;
+            color: #444;
+            text-align: left;
+            line-height: 1.8;
+        }
+
+        .loading-bar {
+            width: 150px;
+            height: 2px;
+            background: #222;
+            margin-top: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: var(--neon-cyan);
+            animation: loading 3s infinite;
+        }
+
+        @keyframes loading {
+            0% { left: -100%; }
+            50% { left: 0; }
+            100% { left: 100%; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="grid-bg"></div>
+
+    <section class="hero">
+        <div class="corner-border top-left"></div>
+        <div class="corner-border bottom-right"></div>
+
+        <div class="glitch-container">
+            <h1 class="glitch-title flicker">SLVZ<span style="color:var(--neon-cyan)">.</span>WEB</h1>
+        </div>
+
+        <p class="hero-desc">
+            > sistema_estratégico_v2.0<br>
+            desenvolvendo o futuro digital.
+        </p>
+        
+      <button id="btnConexao" class="terminal-btn">
+    [ INICIAR_PROTOCOLO ]
+</button>
+
+<script>
+    // --- CONFIGURAÇÃO TERMINAL ---
+    const CONFIG = {
+        whatsappNumber: "5585989092828", // (DDI + DDD + NUMERO)
+        message: "SYSTEM_ACCESS: Olá! Desejo iniciar o protocolo de desenvolvimento de um site moderno com a SLVZ.WEB. Aguardando conexão..."
+    };
+
+    // --- LÓGICA DE CONEXÃO CYBER ---
+    document.getElementById('btnConexao').addEventListener('click', function() {
+        const btn = this;
+        const originalText = btn.innerText;
+        
+        // Efeito visual de "conectando" antes de abrir
+        btn.innerText = "[ CONECTANDO... ]";
+        btn.style.boxShadow = "0 0 50px var(--neon-cyan)";
+        
+        // Pequeno delay para simular processamento tech
+        setTimeout(() => {
+            const url = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(CONFIG.message)}`;
+            
+            // Abre o WhatsApp
+            window.open(url, '_blank');
+            
+            // Restaura o botão após a ação
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.boxShadow = "0 0 30px var(--neon-cyan)";
+            }, 1000);
+            
+        }, 800);
+    });
+
+    // --- EFEITO DE TEXTO "GLITCH" ALEATÓRIO NOS HUDs (Opcional para dar vida) ---
+    function randomGlitch() {
+        const hud = document.querySelector('.hud-info');
+        if (hud) {
+            const original = hud.innerHTML;
+            if (Math.random() > 0.95) {
+                hud.style.color = "#ff00ff"; // Muda para magenta rápido
+                setTimeout(() => {
+                    hud.style.color = "";
+                }, 100);
+            }
+        }
+    }
+    setInterval(randomGlitch, 200);
+</script>
+        
+    </section>
+<style>
+    .services-cyber {
+        background-color: #000000;
+        padding: 100px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .services-header-cyber {
+        text-align: center;
+        margin-bottom: 80px;
+        border-bottom: 1px solid var(--dim-cyan);
+        display: inline-block;
+        left: 50%;
+        transform: translateX(-50%);
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    .services-header-cyber h2 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2rem;
+        letter-spacing: 4px;
+        color: var(--text-color);
+        text-transform: uppercase;
+    }
+
+    .services-grid-cyber {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 30px;
+    }
+
+    /* CARD ESTILO HARDWARE */
+    .service-module {
+        background: rgba(0, 242, 255, 0.02);
+        border: 1px solid #1a1a1a;
+        padding: 30px;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* Corte diagonal no canto superior direito */
+        clip-path: polygon(0 0, 85% 0, 100% 15%, 100% 100%, 0 100%);
+    }
+
+    .service-module::before {
+        content: 'MOD_v2.0';
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 0.6rem;
+        color: #333;
+    }
+
+    .service-module:hover {
+        background: rgba(0, 242, 255, 0.05);
+        border-color: var(--neon-cyan);
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+    }
+
+    .service-module h3 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.1rem;
+        color: var(--neon-cyan);
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .service-module h3::before {
+        content: '> ';
+        font-weight: bold;
+    }
+
+    .service-module p {
+        font-size: 0.85rem;
+        color: #888;
+        line-height: 1.7;
+        margin-bottom: 20px;
+    }
+
+    /* BARRA DE CAPACIDADE (DETALHE TECH) */
+    .capacity-bar {
+        height: 4px;
+        background: #111;
+        width: 100%;
+        position: relative;
+    }
+
+    .capacity-fill {
+        height: 100%;
+        background: var(--neon-cyan);
+        width: 0%;
+        transition: 1.5s ease-out;
+    }
+
+    .service-module:hover .capacity-fill {
+        width: 100%;
+        box-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+    /* MODO MOBILE */
+    @media (max-width: 768px) {
+        .services-header-cyber h2 { font-size: 1.5rem; }
+    }
+</style>
+
+<section class="services-cyber">
+    <div class="services-header-cyber">
+        <h2>System_Upgrades</h2>
+    </div>
+
+    <div class="services-grid-cyber">
+        <div class="service-module">
+            <h3>Sites Institucionais</h3>
+            <p>Arquitetura digital de alta densidade. Criamos sua base de operações online com design agressivo e profissional.</p>
+            <div class="capacity-bar"><div class="capacity-fill" style="transition-delay: 0.1s;"></div></div>
+        </div>
+
+        <div class="service-module">
+            <h3>Landing Pages</h3>
+            <p>Protocolos de conversão otimizados. Páginas de destino focadas em capturar leads e processar vendas em alta velocidade.</p>
+            <div class="capacity-bar"><div class="capacity-fill" style="transition-delay: 0.2s;"></div></div>
+        </div>
+
+        <div class="service-module">
+            <h3>Link WhatsApp</h3>
+            <p>Sincronização direta de comunicação. Pontos de contato estratégicos para fechar negócios sem latência.</p>
+            <div class="capacity-bar"><div class="capacity-fill" style="transition-delay: 0.3s;"></div></div>
+        </div>
+
+        <div class="service-module">
+            <h3>Performance Core</h3>
+            <p>Otimização de hardware via software. Sites leves que carregam instantaneamente em qualquer dispositivo.</p>
+            <div class="capacity-bar"><div class="capacity-fill" style="transition-delay: 0.4s;"></div></div>
+        </div>
+    </div>
+</section>
+<style>
+    .booking-gateway {
+        background-color: #000000;
+        padding: 120px 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        border-top: 1px double var(--dim-cyan);
+    }
+
+    .booking-card {
+        max-width: 800px;
+        width: 100%;
+        background: linear-gradient(145deg, #050505 0%, #000 100%);
+        border: 1px solid #111;
+        padding: 60px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%);
+    }
+
+    /* Detalhes de Interface nos cantos */
+    .booking-card::before {
+        content: 'Espaço de Agendamento Slvz.Web';
+        position: absolute;
+        top: 10px;
+        left: 20px;
+        font-size: 0.6rem;
+        color: var(--neon-cyan);
+        letter-spacing: 2px;
+    }
+
+    .booking-card h2 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        color: var(--text-color);
+        margin-bottom: 20px;
+        text-transform: uppercase;
+    }
+
+    .booking-card p {
+        color: #666;
+        font-size: 1rem;
+        max-width: 500px;
+        margin: 0 auto 40px;
+        line-height: 1.6;
+    }
+
+    /* O Botão que leva para a outra pasta/página */
+    .booking-btn {
+        background: transparent;
+        color: var(--neon-magenta);
+        border: 1px solid var(--neon-magenta);
+        padding: 20px 50px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: 0.4s;
+        text-decoration: none;
+        display: inline-block;
+        position: relative;
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.1);
+    }
+
+    .booking-btn:hover {
+        background: var(--neon-magenta);
+        color: #000;
+        box-shadow: 0 0 40px var(--neon-magenta);
+        transform: translateY(-5px);
+    }
+
+    /* Linhas decorativas laterais */
+    .decor-bracket {
+        position: absolute;
+        width: 20px;
+        height: 80%;
+        border: 1px solid #222;
+        top: 10%;
+    }
+    .left-b { left: 10px; border-right: 0; }
+    .right-b { right: 10px; border-left: 0; }
+
+</style>
+
+<section class="booking-gateway">
+    <div class="booking-card">
+        <div class="decor-bracket left-b"></div>
+        <div class="decor-bracket right-b"></div>
+
+        <h2>Pronto para iniciar?</h2>
+        <p>Acesse nosso terminal de agendamento para reservar seu slot de desenvolvimento e garantir sua vaga na queue.</p>
+        
+        <a href="agendamento.html" class="booking-btn">
+            [ Acessar Agendamento ]
+        </a>
+    </div>
+</section>
+<style>
+    .faq-cyber {
+        background-color: #000000;
+        padding: 100px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .faq-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .faq-header h2 {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--neon-cyan);
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        font-size: 1.8rem;
+    }
+
+    .faq-container {
+        max-width: 800px;
+        width: 100%;
+    }
+
+    /* ESTILO DO ACCORDION */
+    .faq-item {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid #111;
+        margin-bottom: 15px;
+        transition: 0.3s;
+        overflow: hidden;
+    }
+
+    .faq-item:hover {
+        border-color: var(--dim-cyan);
+    }
+
+    .faq-question {
+        padding: 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.9rem;
+        color: var(--text-color);
+        text-transform: uppercase;
+    }
+
+    .faq-question::before {
+        content: '[?]';
+        color: var(--neon-cyan);
+        margin-right: 15px;
+    }
+
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);
+        background: rgba(0, 0, 0, 0.5);
+        color: #888;
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+
+    .faq-item.active .faq-answer {
+        max-height: 1000px;
+        padding: 0 20px 20px 55px;
+        transition: max-height 1s ease-in-out;
+    }
+
+    .faq-item.active {
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.05);
+    }
+
+    .faq-icon {
+        transition: transform 0.3s;
+        color: var(--neon-cyan);
+    }
+
+    .faq-item.active .faq-icon {
+        transform: rotate(45deg);
+    }
+</style>
+
+<section class="faq-cyber">
+    <div class="faq-header">
+        <h2>System_FAQ</h2>
+    </div>
+
+    <div class="faq-container">
+        <div class="faq-item">
+            <div class="faq-question">
+                Quanto tempo leva para o deploy?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                O tempo médio de processamento para sites institucionais é de 7 a 15 dias úteis, dependendo da complexidade dos protocolos integrados.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Eu terei acesso ao código fonte?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Afirmativo. Após a conclusão do protocolo de pagamento, você recebe acesso total aos arquivos e ao domínio, sem taxas ocultas de manutenção.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Como funciona o suporte pós-lançamento?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Oferecemos 30 dias de monitoramento de sistema gratuito para garantir que todos os módulos estejam operando em performance máxima.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Os sites são otimizados para mobile?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Negativo para falhas. Todos os nossos sistemas são desenvolvidos sob a arquitetura Mobile-First, garantindo velocidade terminal em qualquer dispositivo.
+            </div>
+        </div>
+    </div>
+            <div class="faq-item">
+            <div class="faq-question">
+                QUAL O INVESTIMENTO PARA UM PROJETO?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                O orçamento é variável e depende da complexidade dos módulos solicitados (Landing Pages, E-commerce, Integrações de API). Cada projeto é uma solução única; após o briefing inicial, geramos uma proposta técnica com o valor exato para o seu objetivo.
+            </div>
+        </div>
+
+</section>
+<script>
+    // Lógica do Accordion
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', () => {
+            const item = question.parentElement;
+            
+            // Fecha outros itens (opcional)
+            document.querySelectorAll('.faq-item').forEach(otherItem => {
+                if (otherItem !== item) otherItem.classList.remove('active');
+            });
+
+            item.classList.toggle('active');
+        });
+    });
+</script>
+<style>
+    .flow-cyber {
+        background-color: #000000;
+        padding: 100px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-top: 1px solid rgba(0, 242, 255, 0.05);
+    }
+
+    .flow-header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .flow-header h2 {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--text-color);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        font-size: 1.8rem;
+    }
+
+    .flow-header span {
+        color: var(--neon-cyan);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+    }
+
+    .flow-container {
+        max-width: 900px;
+        width: 100%;
+        position: relative;
+    }
+
+    /* Linha Central da Timeline */
+    .flow-container::before {
+        content: '';
+        position: absolute;
+        left: 30px;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: linear-gradient(to bottom, transparent, var(--neon-cyan), transparent);
+    }
+
+    .flow-step {
+        position: relative;
+        padding-left: 80px;
+        margin-bottom: 50px;
+    }
+
+    /* O Ponto na linha */
+    .flow-step::before {
+        content: '';
+        position: absolute;
+        left: 25px;
+        top: 0;
+        width: 10px;
+        height: 10px;
+        background: #000;
+        border: 2px solid var(--neon-cyan);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--neon-cyan);
+        z-index: 2;
+    }
+
+    .step-content {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid #111;
+        padding: 25px;
+        border-radius: 4px;
+        transition: 0.3s;
+    }
+
+    .step-content:hover {
+        border-color: var(--neon-cyan);
+        background: rgba(0, 242, 255, 0.02);
+    }
+
+    .step-number {
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--neon-cyan);
+        font-size: 0.7rem;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .step-content h3 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.1rem;
+        color: var(--text-color);
+        margin-bottom: 10px;
+    }
+
+    .step-content p {
+        font-size: 0.9rem;
+        color: #777;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .flow-step { padding-left: 60px; }
+        .flow-container::before { left: 20px; }
+        .flow-step::before { left: 15px; }
+    }
+</style>
+
+<section class="flow-cyber">
+    <div class="flow-header">
+        <span>[ EXECUTION_STEPS ]</span>
+        <h2>Protocolo de Orçamento</h2>
+    </div>
+
+    <div class="flow-container">
+        <div class="flow-step">
+            <div class="step-content">
+                <span class="step-number">STEP_01</span>
+                <h3>Solicitação de Conexão</h3>
+                <p>Você clica no botão de orçamento e envia a mensagem inicial via WhatsApp. Isso abre seu canal de comunicação direto com o sistema.</p>
+            </div>
+        </div>
+
+        <div class="flow-step">
+            <div class="step-content">
+                <span class="step-number">STEP_02</span>
+                <h3>Briefing de Dados</h3>
+                <p>Enviaremos um formulário rápido ou faremos perguntas diretas para entender suas necessidades: tipo de site, funcionalidades e referências visuais.</p>
+            </div>
+        </div>
+
+        <div class="flow-step">
+            <div class="step-content">
+                <span class="step-number">STEP_03</span>
+                <h3>Análise Técnica e Proposta</h3>
+                <p>Processamos seus dados e apresentamos o valor do investimento e o prazo de entrega. Nada de valores genéricos; tudo é calculado sob medida.</p>
+            </div>
+        </div>
+
+        <div class="flow-step">
+            <div class="step-content">
+                <span class="step-number">STEP_04</span>
+                <h3>Ativação do Protocolo</h3>
+                <p>Com o orçamento aprovado e o sinal confirmado, o desenvolvimento é iniciado e você recebe o link de acompanhamento do projeto.</p>
+            </div>
+        </div>
+    </div>
+    <style>
+    .form-explanation {
+        max-width: 800px;
+        width: 100%;
+        margin-top: 40px;
+        background: rgba(0, 242, 255, 0.02);
+        border: 1px dashed rgba(0, 242, 255, 0.2);
+        padding: 30px;
+        position: relative;
+    }
+
+    .form-explanation h4 {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--neon-cyan);
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-explanation h4::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: var(--neon-cyan);
+        box-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+    .input-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .input-tag {
+        background: #080808;
+        border: 1px solid #1a1a1a;
+        padding: 12px;
+        font-size: 0.75rem;
+        color: #555;
+        font-family: 'JetBrains Mono', monospace;
+        position: relative;
+    }
+
+    .input-tag span {
+        color: var(--neon-cyan);
+        display: block;
+        margin-bottom: 5px;
+        font-size: 0.65rem;
+    }
+
+    .form-note {
+        margin-top: 25px;
+        font-size: 0.8rem;
+        color: #444;
+        font-style: italic;
+        border-left: 2px solid var(--neon-magenta);
+        padding-left: 15px;
+    }
+</style>
+
+<div class="form-explanation">
+    <h4>ESTRUTURA_DO_FORMULÁRIO_DE_DADOS</h4>
+    
+    <div class="input-preview-grid">
+        <div class="input-tag">
+            <span>[01_IDENTIDADE]</span>
+            Nome e nicho do negócio.
+        </div>
+        <div class="input-tag">
+            <span>[02_OBJETIVO]</span>
+            Vendas, autoridade ou captura?
+        </div>
+        <div class="input-tag">
+            <span>[03_ESTRUTURA]</span>
+            Páginas e funções desejadas.
+        </div>
+        <div class="input-tag">
+            <span>[04_REFERÊNCIA]</span>
+            Estilos visuais de preferência.
+        </div>
+    </div>
+
+    <p class="form-note">
+        Nota: O formulário é otimizado para ser preenchido em menos de 2 minutos. Dados precisos aceleram a geração da sua proposta comercial.
+    </p>
+</div>
+
+</section>
+<style>
+    .footer-cyber {
+        background-color: #000000;
+        padding: 60px 20px;
+        border-top: 1px solid #111;
+        position: relative;
+        text-align: center;
+    }
+
+    /* Linha decorativa com glitch de cor */
+    .footer-line {
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-magenta), transparent);
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0.3;
+    }
+
+    .footer-brand {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.2rem;
+        letter-spacing: 5px;
+        color: var(--text-color);
+        text-transform: lowercase; /* Regra de letras minúsculas */
+        margin-bottom: 30px;
+        display: block;
+    }
+
+    /* LINKS SOCIAIS CYBER */
+    .social-links {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .social-item {
+        color: #444;
+        text-decoration: none;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .social-item::before {
+        content: '[ ';
+        color: #222;
+        transition: 0.3s;
+    }
+
+    .social-item::after {
+        content: ' ]';
+        color: #222;
+        transition: 0.3s;
+    }
+
+    .social-item:hover {
+        color: var(--neon-cyan);
+        text-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+    .social-item:hover::before, 
+    .social-item:hover::after {
+        color: var(--neon-cyan);
+    }
+
+    /* COPYRIGHT */
+    .copyright {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.65rem;
+        color: #222;
+        text-transform: lowercase;
+        letter-spacing: 1px;
+    }
+
+    .copyright span {
+        color: #444;
+    }
+
+</style>
+
+<footer class="footer-cyber">
+    <div class="footer-line"></div>
+    
+    <span class="footer-brand">slvz.web</span>
+
+    <div class="social-links">
+        <a href="https://instagram.com/slvzweb" target="_blank" class="social-item">
+            instagram
+        </a>
+        
+        <a href="#" onclick="document.getElementById('btnConexao').click(); return false;" class="social-item">
+            whatsapp
+        </a>
+    </div>
+
+    <p class="copyright">
+        © <span id="current-year"></span> <span>slvz.web</span> // todos os direitos reservados_
+    </p>
+</footer>
+
+<script>
+    // Sincroniza o ano automaticamente
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+</script>
+<script>
+    // 1. Bloqueia o Menu de Contexto (Botão Direito)
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        console.warn("ACCESS_DENIED: Protocolo de segurança slvz.web ativo.");
+    });
+
+    // 2. Bloqueia Atalhos de Teclado (F12, Ctrl+Shift+I, Ctrl+U, etc)
+    document.addEventListener('keydown', (e) => {
+        if (
+            e.key === "F12" ||
+            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
+            (e.ctrlKey && e.key === "u") ||
+            (e.ctrlKey && e.key === "s")
+        ) {
+            e.preventDefault();
+            alert("SECURITY_ALERT: Acesso ao terminal restrito ao operador.");
+            return false;
+        }
+    });
+
+    // 3. Bloqueia o Arraste de Imagens (Evita download simples)
+    document.addEventListener('dragstart', (e) => {
+        if (e.target.nodeName === 'IMG') {
+            e.preventDefault();
+        }
+    });
+
+    // 4. Mensagem Especial no Console (Hacker Style)
+    console.log(
+        "%c SLVZ.WEB %c v2.0 %c\nProtocolo de segurança estabelecido. Não tente burlar o sistema.",
+        "background: #00f2ff; color: #000; font-weight: bold; padding: 5px 10px; border-radius: 5px;",
+        "background: #ff00ff; color: #fff; padding: 5px 10px; border-radius: 5px;",
+        "color: #00f2ff; font-family: monospace;"
+    );
+</script>
+
+<style>
+    /* 5. Impede a seleção de texto em todo o site (Opcional) */
+    body {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* Permite seleção apenas em inputs, se houver */
+    input, textarea {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+</style>
+
+</body>
+</html>
